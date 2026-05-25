@@ -1,6 +1,7 @@
 import { Bell, Flag, Heart, LogOut, MessageCircle, Shield, SlidersHorizontal, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { appName, emptyStates } from "@spark/ui";
+import { api } from "./api";
 
 type Candidate = {
   id: string;
@@ -11,11 +12,25 @@ type Candidate = {
   bio: string;
   interests: string[];
   photo: string;
+  matchId: string;
+};
+
+type ChatMessage = {
+  id: string;
+  body: string;
+  mine: boolean;
+};
+
+type ModerationReport = {
+  id: string;
+  title: string;
+  status: "Open" | "Reviewed";
 };
 
 const demoCandidates: Candidate[] = [
   {
-    id: "1",
+    id: "8be12b1a-5a0e-4bc7-8a38-a62cc49ed841",
+    matchId: "e830f79b-4422-4666-a8c7-1cd04f3e99cf",
     displayName: "Maya",
     age: 31,
     city: "Toronto",
@@ -25,7 +40,8 @@ const demoCandidates: Candidate[] = [
     photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80"
   },
   {
-    id: "2",
+    id: "f7a99a61-b462-4f3e-a728-67421982b4df",
+    matchId: "f69c1991-b827-4591-97a0-5bfa6e3a1c4e",
     displayName: "Rowan",
     age: 29,
     city: "Hamilton",
@@ -41,8 +57,32 @@ export function App() {
   const [tab, setTab] = useState<"discover" | "matches" | "chat" | "privacy" | "moderation">("discover");
   const [index, setIndex] = useState(0);
   const [matches, setMatches] = useState<Candidate[]>([]);
+  const [selectedChat, setSelectedChat] = useState<Candidate>(demoCandidates[0]);
+  const [chatDraft, setChatDraft] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { id: "1", body: "Hey, your coffee standards sound suspiciously high.", mine: false },
+    { id: "2", body: "They are peer reviewed.", mine: true }
+  ]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notice, setNotice] = useState("Welcome back. Discovery is ready.");
+  const [deleteRequested, setDeleteRequested] = useState(false);
+  const [reports, setReports] = useState<ModerationReport[]>([
+    { id: "spam", title: "Spam report", status: "Open" },
+    { id: "harassment", title: "Harassment report", status: "Open" },
+    { id: "impersonation", title: "Impersonation report", status: "Open" }
+  ]);
   const candidate = demoCandidates[index];
   const mutualMatch = useMemo(() => matches[matches.length - 1], [matches]);
+  const visibleMatches = matches.length ? matches : demoCandidates.slice(0, 1);
+
+  async function runApiAction<T>(action: () => Promise<T>, successMessage: string, fallbackMessage: string) {
+    try {
+      await action();
+      setNotice(successMessage);
+    } catch {
+      setNotice(fallbackMessage);
+    }
+  }
 
   if (session === "signed-out") {
     return (
@@ -54,18 +94,33 @@ export function App() {
           </div>
           <form
             className="auth-form"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
+              const form = new FormData(event.currentTarget);
+              const email = String(form.get("email") ?? "");
+              const password = String(form.get("password") ?? "");
+              await runApiAction(
+                async () => {
+                  const result = await api<{ token: string }>("/auth/login", {
+                    method: "POST",
+                    body: JSON.stringify({ email, password })
+                  });
+                  localStorage.setItem("spark-token", result.token);
+                },
+                "Signed in with the API.",
+                "Signed in with demo mode. Start the API to use live auth."
+              );
+              setDeleteRequested(false);
               setSession("signed-in");
             }}
           >
             <label>
               Email
-              <input type="email" autoComplete="email" defaultValue="demo@spark.test" />
+              <input name="email" type="email" autoComplete="email" defaultValue="demo@spark.test" />
             </label>
             <label>
               Password
-              <input type="password" autoComplete="current-password" defaultValue="StrongPass!123" />
+              <input name="password" type="password" autoComplete="current-password" defaultValue="StrongPass!123" />
             </label>
             <button type="submit">Sign in</button>
           </form>
@@ -98,7 +153,13 @@ export function App() {
             <Flag size={18} /> Moderation
           </button>
         </nav>
-        <button className="secondary" onClick={() => setSession("signed-out")}>
+        <button
+          className="secondary"
+          onClick={() => {
+            setNotice("Signed out.");
+            setSession("signed-out");
+          }}
+        >
           <LogOut size={18} /> Sign out
         </button>
       </aside>
@@ -107,12 +168,32 @@ export function App() {
         <header className="topbar">
           <div>
             <h2>{tabTitle(tab)}</h2>
-            <p>{mutualMatch ? `New mutual match with ${mutualMatch.displayName}` : "Profile, matching, chat, and safety controls share one UI language."}</p>
+            <p>
+              {mutualMatch
+                ? `New mutual match with ${mutualMatch.displayName}`
+                : "Profile, matching, chat, and safety controls share one UI language."}
+            </p>
           </div>
-          <button className="icon-button" aria-label="Notifications">
+          <button
+            className="icon-button"
+            aria-label="Notifications"
+            onClick={() => {
+              setNotificationsOpen(!notificationsOpen);
+              setNotice(notificationsOpen ? "Notifications hidden." : "Notifications opened.");
+            }}
+          >
             <Bell size={20} />
           </button>
         </header>
+
+        <div className="status-bar" role="status">
+          {notice}
+        </div>
+        {notificationsOpen && (
+          <section className="notification-panel" aria-label="Notifications">
+            <p>{mutualMatch ? `${mutualMatch.displayName} liked you back.` : "No unread notifications."}</p>
+          </section>
+        )}
 
         {tab === "discover" && (
           <section className="discover-grid">
@@ -124,7 +205,9 @@ export function App() {
                     <h1>
                       {candidate.displayName}, {candidate.age}
                     </h1>
-                    <p>{candidate.city} · {candidate.distance}</p>
+                    <p>
+                      {candidate.city} · {candidate.distance}
+                    </p>
                   </div>
                   <p>{candidate.bio}</p>
                   <div className="chips">
@@ -134,13 +217,38 @@ export function App() {
                   </div>
                 </div>
                 <div className="actions">
-                  <button className="pass" onClick={() => setIndex(index + 1)} aria-label="Pass">
+                  <button
+                    className="pass"
+                    onClick={async () => {
+                      await runApiAction(
+                        () =>
+                          api("/swipes", {
+                            method: "POST",
+                            body: JSON.stringify({ targetUserId: candidate.id, action: "pass" })
+                          }),
+                        `Passed on ${candidate.displayName}.`,
+                        `Passed on ${candidate.displayName} locally.`
+                      );
+                      setIndex(index + 1);
+                    }}
+                    aria-label="Pass"
+                  >
                     <X size={26} />
                   </button>
                   <button
                     className="like"
-                    onClick={() => {
+                    onClick={async () => {
+                      await runApiAction(
+                        () =>
+                          api("/swipes", {
+                            method: "POST",
+                            body: JSON.stringify({ targetUserId: candidate.id, action: "like" })
+                          }),
+                        `You liked ${candidate.displayName}.`,
+                        `You liked ${candidate.displayName} locally.`
+                      );
                       setMatches([...matches, candidate]);
+                      setSelectedChat(candidate);
                       setIndex(index + 1);
                     }}
                     aria-label="Like"
@@ -157,14 +265,22 @@ export function App() {
 
         {tab === "matches" && (
           <section className="list-view">
-            {(matches.length ? matches : demoCandidates.slice(0, 1)).map((match) => (
+            {visibleMatches.map((match) => (
               <article className="match-row" key={match.id}>
                 <img src={match.photo} alt="" />
                 <div>
                   <h3>{match.displayName}</h3>
                   <p>{match.bio}</p>
                 </div>
-                <button>Message</button>
+                <button
+                  onClick={() => {
+                    setSelectedChat(match);
+                    setTab("chat");
+                    setNotice(`Opened chat with ${match.displayName}.`);
+                  }}
+                >
+                  Message
+                </button>
               </article>
             ))}
           </section>
@@ -172,12 +288,41 @@ export function App() {
 
         {tab === "chat" && (
           <section className="chat-view">
+            <h3 className="chat-heading">{selectedChat.displayName}</h3>
             <div className="messages">
-              <p className="message theirs">Hey, your coffee standards sound suspiciously high.</p>
-              <p className="message mine">They are peer reviewed.</p>
+              {chatMessages.map((message) => (
+                <p className={`message ${message.mine ? "mine" : "theirs"}`} key={message.id}>
+                  {message.body}
+                </p>
+              ))}
             </div>
-            <form className="composer">
-              <input placeholder={emptyStates.chat} />
+            <form
+              className="composer"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                const body = chatDraft.trim();
+                if (!body) {
+                  setNotice("Write a message first.");
+                  return;
+                }
+                await runApiAction(
+                  () =>
+                    api("/messages", {
+                      method: "POST",
+                      body: JSON.stringify({ matchId: selectedChat.matchId, body })
+                    }),
+                  `Message sent to ${selectedChat.displayName}.`,
+                  `Message saved locally for ${selectedChat.displayName}.`
+                );
+                setChatMessages([...chatMessages, { id: crypto.randomUUID(), body, mine: true }]);
+                setChatDraft("");
+              }}
+            >
+              <input
+                placeholder={emptyStates.chat}
+                value={chatDraft}
+                onChange={(event) => setChatDraft(event.target.value)}
+              />
               <button type="submit">Send</button>
             </form>
           </section>
@@ -188,22 +333,61 @@ export function App() {
             {["Show distance", "Show online status", "Enable discovery", "Allow notifications"].map((setting) => (
               <label className="toggle-row" key={setting}>
                 <span>{setting}</span>
-                <input type="checkbox" defaultChecked />
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  onChange={(event) => setNotice(`${setting} ${event.target.checked ? "enabled" : "disabled"}.`)}
+                />
               </label>
             ))}
-            <button className="danger">Delete account</button>
+            <button
+              className="danger"
+              onClick={async () => {
+                if (deleteRequested) {
+                  await runApiAction(
+                    () => api("/me", { method: "DELETE" }),
+                    "Account deletion scheduled.",
+                    "Account deletion scheduled locally."
+                  );
+                  setSession("signed-out");
+                  return;
+                }
+                setDeleteRequested(true);
+                setNotice("Tap delete again to confirm account deletion.");
+              }}
+            >
+              {deleteRequested ? "Confirm delete" : "Delete account"}
+            </button>
           </section>
         )}
 
         {tab === "moderation" && (
           <section className="list-view">
-            {["Spam report", "Harassment report", "Impersonation report"].map((report) => (
-              <article className="moderation-row" key={report}>
+            {reports.map((report) => (
+              <article className="moderation-row" key={report.id}>
                 <div>
-                  <h3>{report}</h3>
-                  <p>Review evidence, hide profile, dismiss, or escalate.</p>
+                  <h3>{report.title}</h3>
+                  <p>
+                    {report.status === "Open"
+                      ? "Review evidence, hide profile, dismiss, or escalate."
+                      : "Reviewed and moved out of the active queue."}
+                  </p>
                 </div>
-                <button>Review</button>
+                <button
+                  onClick={async () => {
+                    await runApiAction(
+                      () =>
+                        api(`/moderation/profiles/${demoCandidates[0].id}/hide`, {
+                          method: "POST"
+                        }),
+                      `${report.title} reviewed through the API.`,
+                      `${report.title} marked reviewed locally.`
+                    );
+                    setReports(reports.map((item) => (item.id === report.id ? { ...item, status: "Reviewed" } : item)));
+                  }}
+                >
+                  {report.status === "Open" ? "Review" : "Reviewed"}
+                </button>
               </article>
             ))}
           </section>

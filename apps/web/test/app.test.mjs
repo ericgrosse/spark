@@ -17,6 +17,28 @@ test("web app keeps the shared mobile-first navigation controls", () => {
   assert.match(styles, /\.profile-card/);
 });
 
+test("web app buttons and forms trigger actions", () => {
+  const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+
+  assert.doesNotMatch(app, /<button>Message<\/button>/);
+  assert.doesNotMatch(app, /<button>Review<\/button>/);
+  assert.doesNotMatch(app, /<button className="danger">Delete account<\/button>/);
+  assert.match(app, /aria-label="Notifications"[\s\S]*?onClick=/);
+  assert.match(app, /className="composer"[\s\S]*?onSubmit=/);
+  assert.match(app, /api<\{ token: string \}>\("\/auth\/login"/);
+  assert.match(app, /api\("\/swipes"/);
+  assert.match(app, /api\("\/messages"/);
+  assert.match(app, /api\("\/me"/);
+  assert.match(app, /role="status"/);
+});
+
+test("web app styles visible action feedback", () => {
+  const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+
+  assert.match(styles, /\.status-bar/);
+  assert.match(styles, /\.notification-panel/);
+});
+
 test("Netlify publishes the web app with an index page", () => {
   const netlifyConfig = readFileSync(new URL("../../../netlify.toml", import.meta.url), "utf8");
   const rootPackage = readFileSync(new URL("../../../package.json", import.meta.url), "utf8");

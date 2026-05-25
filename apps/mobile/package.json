@@ -15,19 +15,16 @@
   "dependencies": {
     "@spark/shared": "file:../../packages/shared",
     "@spark/ui": "file:../../packages/ui",
-    "expo": "^51.0.18",
-    "expo-image-picker": "^15.0.7",
-    "expo-location": "^17.0.1",
-    "expo-notifications": "^0.28.10",
+    "expo": "^56.0.4",
     "lucide-react-native": "^0.468.0",
-    "react": "18.2.0",
-    "react-native": "^0.74.3",
+    "react": "19.2.3",
+    "react-native": "^0.85.3",
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "@types/react": "^18.2.79",
+    "@types/react": "^19.2.0",
     "eslint": "^9.6.0",
     "typescript": "^5.5.3",
-    "vitest": "^2.0.3"
+    "vitest": "^4.1.7"
   }
 }

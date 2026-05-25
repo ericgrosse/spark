@@ -1,24 +1,23 @@
 {
   "name": "@spark/desktop",
   "version": "0.1.0",
+  "description": "Spark desktop shell for Windows, macOS, and Linux.",
+  "author": "Spark",
   "private": true,
   "type": "module",
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
     "build": "electron-builder",
-    "test": "vitest run --passWithNoTests",
+    "test": "node --test test/*.test.mjs",
     "lint": "eslint src --ext .js",
     "typecheck": "tsc --allowJs --checkJs --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 --esModuleInterop --skipLibCheck src/main.js"
   },
-  "dependencies": {
-    "electron": "^31.1.0"
-  },
   "devDependencies": {
-    "electron-builder": "^24.13.3",
+    "electron": "42.2.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.6.0",
-    "typescript": "^5.5.3",
-    "vitest": "^2.0.3"
+    "typescript": "^5.5.3"
   },
   "build": {
     "appId": "com.example.sparkdating",

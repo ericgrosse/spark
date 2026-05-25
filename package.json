@@ -1,6 +1,7 @@
 {
   "name": "spark-dating-platform",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "description": "Cross-platform dating app monorepo for web, mobile, desktop, and API.",
   "workspaces": [
@@ -11,13 +12,19 @@
     "@eslint/js": "^9.6.0",
     "typescript-eslint": "^8.0.0"
   },
+  "overrides": {
+    "fast-xml-parser": "^5.7.0",
+    "uuid": "^11.1.1"
+  },
   "scripts": {
+    "postinstall": "npm run prisma:generate --if-present",
+    "prisma:generate": "npm --workspace @spark/api run prisma:generate",
     "dev": "npm run dev --workspaces",
-    "build": "npm run build --workspaces",
+    "build": "npm --workspace @spark/shared run build && npm --workspace @spark/ui run build && npm --workspace @spark/api run build && npm --workspace @spark/web run build && npm --workspace @spark/mobile run build && npm --workspace @spark/desktop run build",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces",
-    "netlify:build": "npm --workspace @spark/api run prisma:generate && npm run test && npm --workspace @spark/web run typecheck && npm --workspace @spark/web run build && node scripts/verify-netlify-output.mjs"
+    "netlify:build": "npm run prisma:generate && npm run test && npm --workspace @spark/web run typecheck && npm --workspace @spark/web run build && node scripts/verify-netlify-output.mjs"
   },
   "engines": {
     "node": ">=20.11.0",

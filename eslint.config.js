@@ -8,10 +8,29 @@ export default [
     ignores: ["dist/**", "build/**", "node_modules/**", ".expo/**", "coverage/**"],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: "module"
+      sourceType: "module",
+      globals: {
+        console: "readonly",
+        crypto: "readonly",
+        URL: "readonly",
+        process: "readonly",
+        Buffer: "readonly"
+      }
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "warn"
+    }
+  },
+  {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      globals: {
+        require: "readonly",
+        process: "readonly"
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off"
     }
   }
 ];

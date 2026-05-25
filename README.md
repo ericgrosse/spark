@@ -32,11 +32,62 @@ Spark is a cross-platform dating app starter for web, Android, iOS, Windows, mac
 ```bash
 npm install
 cp apps/api/.env.example apps/api/.env
-npm run test
+npm run prisma:generate
+npm test
 npm run dev
 ```
 
 The web app runs on Vite, the API runs on Express, the mobile app runs through Expo, and the desktop app launches Electron against the web build/dev server.
+
+## Local Development
+
+Requirements:
+
+- Node.js 20.11 or newer
+- npm 10 or newer
+- PostgreSQL 15 or newer for API persistence
+
+Environment variables live in `apps/api/.env`:
+
+```bash
+NODE_ENV=development
+PORT=4000
+DATABASE_URL=postgresql://spark:spark@localhost:5432/spark?schema=public
+JWT_SECRET=replace-with-a-long-random-secret
+WEB_ORIGIN=http://localhost:5173
+UPLOAD_DIR=uploads
+```
+
+Database setup:
+
+```bash
+createdb spark
+npm install
+npm run prisma:generate
+npm --workspace @spark/api run prisma:migrate
+```
+
+Daily commands:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm audit
+```
+
+Netlify deploys the web app from `apps/web/dist`:
+
+```bash
+npm run netlify:build
+```
+
+## CI Notes
+
+`npm install` runs `postinstall`, which calls `npm run prisma:generate`. The root `prisma:generate` script delegates to the API workspace and uses the checked-in schema path `apps/api/prisma/schema.prisma`, so generated Prisma client setup is deterministic in CI.
+
+The repository includes `.npmrc` with `audit-level=high`. Current high and critical advisories are fixed. Remaining moderate advisories are from Expo/React Native CLI development tooling (`fast-xml-parser`) and Expo config parsing (`uuid` through `xcode`). Root `overrides` pin patched transitive versions where npm can safely apply them; the remaining audit entries are tracked upstream and do not affect the deployed Netlify web app or the runtime API.
 
 ## Repository Layout
 

@@ -12,11 +12,12 @@
     "typescript-eslint": "^8.0.0"
   },
   "scripts": {
-    "dev": "npm run dev -ws",
-    "build": "npm run build -ws",
-    "test": "npm run test -ws",
-    "lint": "npm run lint -ws",
-    "typecheck": "npm run typecheck -ws"
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "netlify:build": "npm run test && npm --workspace @spark/mobile run typecheck && npm --workspace @spark/mobile run build"
   },
   "engines": {
     "node": ">=20.11.0",

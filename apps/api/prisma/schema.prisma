@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(USER)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  profile      Profile?
+  sentSwipes   Swipe[]   @relation("sentSwipes")
+  reportsMade  Report[]  @relation("reportsMade")
+  reportsGot   Report[]  @relation("reportsGot")
+}
+
+model Profile {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  displayName        String
+  birthDate          DateTime
+  bio                String   @default("")
+  interests          String[]
+  photos             String[]
+  latitude           Float?
+  longitude          Float?
+  city               String?
+  showDistance       Boolean  @default(true)
+  showOnlineStatus   Boolean  @default(true)
+  discoveryEnabled   Boolean  @default(true)
+  maximumDistanceKm  Int      @default(80)
+  hiddenByModeration Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Swipe {
+  id         String      @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  action     SwipeAction
+  createdAt  DateTime    @default(now())
+  fromUser   User        @relation("sentSwipes", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+}
+
+model Match {
+  id        String    @id @default(uuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime  @default(now())
+  messages  Message[]
+
+  @@unique([userAId, userBId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  matchId   String
+  senderId  String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+}
+
+model Block {
+  id            String   @id @default(uuid())
+  blockerUserId String
+  blockedUserId String
+  createdAt     DateTime @default(now())
+
+  @@unique([blockerUserId, blockedUserId])
+}
+
+model Report {
+  id             String       @id @default(uuid())
+  reporterUserId String
+  reportedUserId String
+  reason         String
+  details        String?
+  status         ReportStatus @default(OPEN)
+  createdAt      DateTime     @default(now())
+  reporter       User         @relation("reportsMade", fields: [reporterUserId], references: [id], onDelete: Cascade)
+  reported       User         @relation("reportsGot", fields: [reportedUserId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum SwipeAction {
+  like
+  pass
+}
+
+enum ReportStatus {
+  OPEN
+  ACTIONED
+  DISMISSED
+}

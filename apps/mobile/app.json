@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Spark",
+    "slug": "spark-dating",
+    "scheme": "spark",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "ios": {
+      "bundleIdentifier": "com.example.sparkdating",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Spark uses your location to show nearby profiles.",
+        "NSPhotoLibraryUsageDescription": "Spark lets you upload profile photos."
+      }
+    },
+    "android": {
+      "package": "com.example.sparkdating",
+      "permissions": ["ACCESS_FINE_LOCATION", "POST_NOTIFICATIONS", "READ_MEDIA_IMAGES"]
+    },
+    "extra": {
+      "apiUrl": "http://localhost:4000"
+    }
+  }
+}

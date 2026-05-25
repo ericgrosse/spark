@@ -1,0 +1,40 @@
+{
+  "name": "@spark/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src --ext .js",
+    "typecheck": "tsc --allowJs --checkJs --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 --esModuleInterop --skipLibCheck src/main.js"
+  },
+  "dependencies": {
+    "electron": "^31.1.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.13.3",
+    "eslint": "^9.6.0",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3"
+  },
+  "build": {
+    "appId": "com.example.sparkdating",
+    "productName": "Spark",
+    "files": ["src/**/*", "../../apps/web/dist/**/*"],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "target": ["dmg"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"]
+    }
+  }
+}

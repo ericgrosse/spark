@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.expo/
+.env
+.env.local
+coverage/
+*.log
+apps/api/uploads/
+apps/desktop/release/

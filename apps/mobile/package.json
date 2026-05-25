@@ -1,0 +1,33 @@
+{
+  "name": "@spark/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "dev": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build": "expo export",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@spark/shared": "file:../../packages/shared",
+    "@spark/ui": "file:../../packages/ui",
+    "expo": "^51.0.18",
+    "expo-image-picker": "^15.0.7",
+    "expo-location": "^17.0.1",
+    "expo-notifications": "^0.28.10",
+    "lucide-react-native": "^0.468.0",
+    "react": "18.2.0",
+    "react-native": "^0.74.3",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.79",
+    "eslint": "^9.6.0",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3"
+  }
+}

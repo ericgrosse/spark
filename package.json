@@ -17,7 +17,7 @@
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces",
-    "netlify:build": "npm --workspace @spark/api run prisma:generate && npm run test && npm --workspace @spark/mobile run typecheck && npm --workspace @spark/mobile run build"
+    "netlify:build": "npm --workspace @spark/api run prisma:generate && npm run test && npm --workspace @spark/web run typecheck && npm --workspace @spark/web run build && node scripts/verify-netlify-output.mjs"
   },
   "engines": {
     "node": ">=20.11.0",

@@ -11,13 +11,13 @@
     "build": "electron-builder",
     "test": "node --test test/*.test.mjs",
     "lint": "eslint src --ext .js",
-    "typecheck": "tsc --allowJs --checkJs --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 --esModuleInterop --skipLibCheck src/main.js"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "electron": "42.2.0",
     "electron-builder": "^26.0.12",
     "eslint": "^9.6.0",
-    "typescript": "^5.5.3"
+    "typescript": "^6.0.3"
   },
   "build": {
     "appId": "com.example.sparkdating",

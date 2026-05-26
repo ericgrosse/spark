@@ -57,10 +57,16 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
+/**
+ * @param {string} url
+ */
 function isSafeExternalUrl(url) {
   return ["https:", "mailto:"].includes(new URL(url).protocol);
 }
 
+/**
+ * @param {string} url
+ */
 function isAllowedAppUrl(url) {
   const parsedUrl = new URL(url);
   if (app.isPackaged) return parsedUrl.protocol === "file:";

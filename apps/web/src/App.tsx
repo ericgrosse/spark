@@ -1,4 +1,3 @@
-import { Bell, Flag, Heart, LogOut, MessageCircle, Shield, SlidersHorizontal, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { appName, emptyStates } from "@spark/ui";
 import { api } from "./api";
@@ -138,19 +137,19 @@ export function App() {
         </div>
         <nav>
           <button className={tab === "discover" ? "active" : ""} onClick={() => setTab("discover")}>
-            <Heart size={18} /> Discover
+            <span className="nav-icon" aria-hidden="true">D</span> Discover
           </button>
           <button className={tab === "matches" ? "active" : ""} onClick={() => setTab("matches")}>
-            <Shield size={18} /> Matches
+            <span className="nav-icon" aria-hidden="true">M</span> Matches
           </button>
           <button className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>
-            <MessageCircle size={18} /> Chat
+            <span className="nav-icon" aria-hidden="true">C</span> Chat
           </button>
           <button className={tab === "privacy" ? "active" : ""} onClick={() => setTab("privacy")}>
-            <SlidersHorizontal size={18} /> Privacy
+            <span className="nav-icon" aria-hidden="true">P</span> Privacy
           </button>
           <button className={tab === "moderation" ? "active" : ""} onClick={() => setTab("moderation")}>
-            <Flag size={18} /> Moderation
+            <span className="nav-icon" aria-hidden="true">R</span> Moderation
           </button>
         </nav>
         <button
@@ -160,7 +159,7 @@ export function App() {
             setSession("signed-out");
           }}
         >
-          <LogOut size={18} /> Sign out
+          <span className="nav-icon" aria-hidden="true">S</span> Sign out
         </button>
       </aside>
 
@@ -182,7 +181,7 @@ export function App() {
               setNotice(notificationsOpen ? "Notifications hidden." : "Notifications opened.");
             }}
           >
-            <Bell size={20} />
+            <span aria-hidden="true">!</span>
           </button>
         </header>
 
@@ -233,7 +232,7 @@ export function App() {
                     }}
                     aria-label="Pass"
                   >
-                    <X size={26} />
+                    <span className="action-icon" aria-hidden="true">x</span>
                   </button>
                   <button
                     className="like"
@@ -253,7 +252,7 @@ export function App() {
                     }}
                     aria-label="Like"
                   >
-                    <Heart size={28} />
+                    <span className="action-icon" aria-hidden="true">&lt;3</span>
                   </button>
                 </div>
               </article>

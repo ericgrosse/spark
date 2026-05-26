@@ -50,3 +50,18 @@ test("Netlify publishes the web app with an index page", () => {
   assert.match(rootPackage, /verify-netlify-output/);
   assert.equal(redirects.trim(), "/* /index.html 200");
 });
+
+test("Vite resolves web React from one runtime", () => {
+  const viteConfig = readFileSync(new URL("../vite.config.ts", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
+  const packageJson = readFileSync(new URL("../package.json", import.meta.url), "utf8");
+
+  assert.doesNotMatch(app, /from "lucide-react"/);
+  assert.doesNotMatch(packageJson, /"lucide-react"/);
+  assert.match(viteConfig, /const webNodeModules/);
+  assert.match(viteConfig, /react: `\$\{webNodeModules\}react`/);
+  assert.match(viteConfig, /"react-dom": `\$\{webNodeModules\}react-dom`/);
+  assert.match(viteConfig, /"react\/jsx-runtime": `\$\{webNodeModules\}react\/jsx-runtime\.js`/);
+  assert.match(viteConfig, /"react\/jsx-dev-runtime": `\$\{webNodeModules\}react\/jsx-dev-runtime\.js`/);
+  assert.match(viteConfig, /dedupe: \["react", "react-dom"\]/);
+});
